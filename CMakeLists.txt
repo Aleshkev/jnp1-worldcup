@@ -10,7 +10,7 @@ include_directories(.)
 
 add_executable(jnp1_worldcup
         worldcup_example.cc
-        )
+        worldcup.h)
 
 add_custom_target(format
         COMMAND /usr/bin/clang-format
