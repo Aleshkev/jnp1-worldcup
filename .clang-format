@@ -10,4 +10,4 @@ AlwaysBreakTemplateDeclarations: Yes
 AlwaysBreakAfterDefinitionReturnType: TopLevel
 
 # Peczar ucina punkty za niekonsekwentne stawianie nawiasów xd
-#InsertBraces: true
+InsertBraces: true
