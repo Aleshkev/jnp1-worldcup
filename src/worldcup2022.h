@@ -16,6 +16,8 @@ class TooFewPlayersException : public std::exception {};
 
 class WorldCup2022 : public WorldCup {
  private:
+  class GameEnds : public std::exception {};
+
   std::shared_ptr<ScoreBoard> currentScoreboard;
 
   std::shared_ptr<Board> board;
@@ -88,9 +90,12 @@ class WorldCup2022 : public WorldCup {
       throw TooFewPlayersException();
     }
 
-    for (unsigned int i = 0; i < rounds; ++i) {
-      // TODO: przerwać jak się skończy
-      doRound(i);
+    try {
+      for (unsigned int i = 0; i < rounds; ++i) {
+        doRound(i);
+      }
+    } catch (GameEnds &exception) {
+      return;
     }
   }
 
@@ -98,31 +103,34 @@ class WorldCup2022 : public WorldCup {
   void doRound(unsigned int roundNo) {
     currentScoreboard->onRound(roundNo);
     for (auto &player : activePlayers) {
-      size_t move = 0;
-      for (auto &die : dies) {
-        move += die->roll();
-      }
+      try {
+        size_t move = 0;
+        for (auto &die : dies) {
+          move += die->roll();
+        }
 
-      // TODO: zapętlenie planszy
-      for (size_t i = player->getPosition(); i <= player->getPosition() + move;
-           ++i) {
-        board->getField(i)->onPlayerPassesThrough(player);
+        // TODO: zapętlenie planszy
+        for (size_t i = player->getPosition();
+             i <= player->getPosition() + move; ++i) {
+          board->getField(i)->onPlayerPassesThrough(player);
+          // sprawdzić bankructwo ...
+        }
+        auto newPosition = player->getPosition() + move;
+        board->getField(newPosition)->onPlayerLands(player);
         // sprawdzić bankructwo ...
+        player->setPosition(newPosition);
+        // ...
+      } catch (PlayerBankruptcy &exception) {
+        // Jeśli pozostał tylko jeden gracz w grze, to gra się kończy.
+        if (activePlayers.size() == 1) {
+          currentScoreboard->onWin(activePlayers.front()->getName());
+          throw GameEnds();
+        }
+        continue;  // TODO??
       }
-      auto newPosition = player->getPosition() + move;
-      board->getField(newPosition)->onPlayerLands(player);
-      // sprawdzić bankructwo ...
-      player->setPosition(newPosition);
-      // ...
     }
 
     // TODO
-
-    // Jeśli pozostał tylko jeden gracz w grze, to gra się kończy.
-    if (activePlayers.size() == 1) {
-      currentScoreboard->onWin(activePlayers.front()->getName());
-      return;
-    }
 
     for (auto &player : activePlayers) {
       currentScoreboard->onTurn(player->getName(), player->getStatus(), "",
