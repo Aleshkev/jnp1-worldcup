@@ -102,7 +102,7 @@ class YellowCardField : public Field {
   }
 
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->setTurnsToWait(nTurnsToWait);
   }
 };
 
