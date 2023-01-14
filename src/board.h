@@ -13,7 +13,7 @@ class Board {
   std::vector<std::shared_ptr<Field>> fields;
   size_t startPosition;  // Gdzie każdy gracz rozpoczyna grę.
 
-
+ protected:
   explicit Board(const std::vector<std::shared_ptr<Field>>& fields)
       : fields(fields) {
     startPosition = 0;

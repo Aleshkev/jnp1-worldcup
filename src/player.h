@@ -5,26 +5,20 @@
 
 #include "common.h"
 
-class PlayerBankruptcy : public std::exception {
- public:
-  PlayerBankruptcy() = default;
-};
 
 class Player {
  private:
+  static constexpr zdzislaw_t INITIAL_MONEY = 1000;
   const std::string name;
   zdzislaw_t money;  // Ile zdzisławów.
-  bool isBankrupt;
-  static constexpr zdzislaw_t INITIAL_MONEY = 1000;
-  size_t position;     // Pozycja na planszy.
+  bool isBancrupt;
   size_t turnsToWait;  // Ile tur jeszcze musi czekać bez grania.
 
  public:
-  explicit Player(std::string name, size_t position)
+  explicit Player(std::string name)
       : name(std::move(name)),
         money(INITIAL_MONEY),
-        isBankrupt(false),
-        position(position),
+        isBancrupt(false),
         turnsToWait(0) {
   }
 
@@ -33,7 +27,7 @@ class Player {
   }
 
   [[nodiscard]] std::string getStatus() const {
-    if (isBankrupt) {
+    if (isBancrupt) {
       return "*** bankrut ***";
     } else if (turnsToWait > 0) {
       return std::string("*** czekanie: ") + std::to_string(turnsToWait) +
@@ -46,27 +40,37 @@ class Player {
     return money;
   }
 
-  void takeMoney(zdzislaw_t amount) {
-    if (money < amount) {
-      money = 0;
-      isBankrupt = true;
-      throw PlayerBankruptcy();
+  void giveMoney(zdzislaw_t amount) {
+    if(!isBancrupt) {
+      money += amount;
     }
-    money -= amount;
   }
 
- public:
-  [[nodiscard]] size_t getPosition() const {
-    return position;
+  zdzislaw_t takeMoney(zdzislaw_t amount) {
+    if (money < amount) {
+      zdzislaw_t ret = money;
+      money = 0;
+      isBancrupt = true;
+      return ret;
+    }
+    money -= amount;
+    return amount;
   }
-  void setPosition(size_t newPosition) {
-    position = newPosition;
+
+  [[nodiscard]] bool getIsBancrupt() const {
+    return isBancrupt;
   }
+
   [[nodiscard]] size_t getTurnsToWait() const {
     return turnsToWait;
   }
+
   void setTurnsToWait(size_t newTurnsToWait) {
     turnsToWait = newTurnsToWait;
+  }
+
+  void wait() {
+    turnsToWait--;
   }
 };
 

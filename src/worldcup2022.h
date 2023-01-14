@@ -50,8 +50,8 @@ class WorldCup2022 : public WorldCup {
 
   // Dodaje nowego gracza o podanej nazwie.
   void addPlayer(std::string const &name) override {
-    activePlayers.push_back(
-        std::make_shared<Player>(name, board->getStartPosition()));
+    activePlayers.push_back(std::make_shared<Player>(name));
+    playerPositions.push_back(board->getStartPosition());
   }
 
   // Konfiguruje tablicę wyników. Domyślnie jest skonfigurowana tablica
@@ -100,33 +100,36 @@ class WorldCup2022 : public WorldCup {
   }
 
  private:
+  std::vector<size_t> playerPositions;
+
   void doRound(unsigned int roundNo) {
     currentScoreboard->onRound(roundNo);
-    for (auto &player : activePlayers) {
-      try {
-        size_t move = 0;
-        for (auto &die : dies) {
-          move += die->roll();
-        }
+    for (size_t playerID = 0; playerID < activePlayers.size(); ++playerID) {
+      auto &player = activePlayers[playerID];
+      if (player->getIsBancrupt()) {
+        continue;
+      }
+      if (player->getTurnsToWait() > 0) {
+        player->wait();
+        continue;
+      }
+      size_t move = 0;
+      for (auto &die : dies) {
+        move += die->roll();
+      }
+      size_t targetPosition =
+          (playerPositions[playerID] + move) % board->getNFields();
 
-        // TODO: zapętlenie planszy
-        for (size_t i = player->getPosition();
-             i <= player->getPosition() + move; ++i) {
-          board->getField(i)->onPlayerPassesThrough(player);
-          // sprawdzić bankructwo ...
+      while (!player->getIsBancrupt() &&
+             playerPositions[playerID] != targetPosition) {
+        playerPositions[playerID] = (targetPosition + 1) % board->getNFields();
+
+        if (playerPositions[playerID] != targetPosition) {
+          board->getField(playerPositions[playerID])
+              ->onPlayerPassesThrough(player);
+        } else {
+          board->getField(playerPositions[playerID])->onPlayerLands(player);
         }
-        auto newPosition = player->getPosition() + move;
-        board->getField(newPosition)->onPlayerLands(player);
-        // sprawdzić bankructwo ...
-        player->setPosition(newPosition);
-        // ...
-      } catch (PlayerBankruptcy &exception) {
-        // Jeśli pozostał tylko jeden gracz w grze, to gra się kończy.
-        if (activePlayers.size() == 1) {
-          currentScoreboard->onWin(activePlayers.front()->getName());
-          throw GameEnds();
-        }
-        continue;  // TODO??
       }
     }
 
