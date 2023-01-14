@@ -62,6 +62,12 @@ class Player {
   void setPosition(size_t newPosition) {
     position = newPosition;
   }
+  [[nodiscard]] size_t getTurnsToWait() const {
+    return turnsToWait;
+  }
+  void setTurnsToWait(size_t newTurnsToWait) {
+    turnsToWait = newTurnsToWait;
+  }
 };
 
 #endif
