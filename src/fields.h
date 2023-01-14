@@ -13,16 +13,18 @@
 // początek sezonu – przy przejściu lub zatrzymaniu się na tym polu gracz
 // dostaje 50 zdzisławów;
 class BeginningOfTheSeasonField : public Field {
+  constexpr static zdzislaw_t STARTING_MONEY = 50;
+
  public:
   explicit BeginningOfTheSeasonField(const std::string& name) : Field(name) {
   }
 
  public:
   void onPlayerPassesThrough(std::shared_ptr<Player> player) override {
-    Field::onPlayerPassesThrough(player);
+    player->giveMoney(STARTING_MONEY);
   }
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->giveMoney(STARTING_MONEY);
   }
   bool canBeAStartPosition() override {
     return true;
@@ -46,7 +48,7 @@ class GoalField : public Field {
   }
 
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->giveMoney(bonus);
   }
 };
 
@@ -61,7 +63,7 @@ class PenaltyKickField : public Field {
   }
 
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->takeMoney(penalty);
   }
 };
 
@@ -69,8 +71,10 @@ class PenaltyKickField : public Field {
 // zdzisławach, a pozostali przegrywają; seria zaczyna się od wygranego zakładu
 // u bukmachera;
 class BookmakerField : public Field {
+  static constexpr size_t modulo = 3;
   const zdzislaw_t winnings;
   const zdzislaw_t losses;
+  size_t counter = 0;
 
  public:
   BookmakerField(std::string name, const zdzislaw_t winnings,
@@ -79,7 +83,12 @@ class BookmakerField : public Field {
   }
 
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    if (counter == 0) {
+      player->giveMoney(winnings);
+    } else {
+      player->takeMoney(losses);
+    }
+    counter = (counter + 1) % modulo;
   }
 };
 
@@ -107,6 +116,7 @@ class MatchField : public Field {
  private:
   const zdzislaw_t fee;
   const MatchWeight weight;
+  zdzislaw_t collectedFees = 0;
 
   [[nodiscard]] constexpr double getMatchWeight() const {
     switch (weight) {
@@ -127,10 +137,11 @@ class MatchField : public Field {
 
  public:
   void onPlayerPassesThrough(std::shared_ptr<Player> player) override {
-    Field::onPlayerPassesThrough(player);
+    collectedFees += player->takeMoney(fee);
   }
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->giveMoney(collectedFees * getMatchWeight());
+    collectedFees = 0;
   }
 };
 
