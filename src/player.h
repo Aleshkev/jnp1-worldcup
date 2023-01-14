@@ -5,27 +5,18 @@
 
 #include "common.h"
 
-class PlayerBankruptcy : public std::exception {
- public:
-  PlayerBankruptcy() = default;
-};
-
 class Player {
  private:
   const std::string name;
-  zdzislaw_t money;  // Ile zdzisławów.
-  bool isBankrupt;
+  bool isBankrupt = false;
   static constexpr zdzislaw_t INITIAL_MONEY = 1000;
-  size_t position;     // Pozycja na planszy.
-  size_t turnsToWait;  // Ile tur jeszcze musi czekać bez grania.
+  zdzislaw_t money = INITIAL_MONEY;  // Ile zdzisławów.
+  size_t position;                   // Pozycja na planszy.
+  size_t turnsToWait = 0;            // Ile tur jeszcze musi czekać bez grania.
 
  public:
   explicit Player(std::string name, size_t position)
-      : name(std::move(name)),
-        money(INITIAL_MONEY),
-        isBankrupt(false),
-        position(position),
-        turnsToWait(0) {
+      : name(std::move(name)), position(position) {
   }
 
   [[nodiscard]] const std::string &getName() const {
@@ -46,13 +37,24 @@ class Player {
     return money;
   }
 
-  void takeMoney(zdzislaw_t amount) {
-    if (money < amount) {
+  void giveMoney(zdzislaw_t amount) {
+    if (!isBankrupt) {
+      money += amount;
+    } else {
+      // CHECKIT
+      throw std::runtime_error("Gracz jest bankrutem.");
+    }
+  }
+
+  int takeMoney(zdzislaw_t amount) {
+    if (money < amount || isBankrupt) {
+      zdzislaw_t retVal = money;
       money = 0;
       isBankrupt = true;
-      throw PlayerBankruptcy();
+      return retVal;
     }
     money -= amount;
+    return amount;
   }
 
  public:

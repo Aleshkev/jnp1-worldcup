@@ -13,16 +13,19 @@
 // początek sezonu – przy przejściu lub zatrzymaniu się na tym polu gracz
 // dostaje 50 zdzisławów;
 class BeginningOfTheSeasonField : public Field {
+ private:
+  const zdzislaw_t reward = 50;
+
  public:
   explicit BeginningOfTheSeasonField(const std::string& name) : Field(name) {
   }
 
  public:
   void onPlayerPassesThrough(std::shared_ptr<Player> player) override {
-    Field::onPlayerPassesThrough(player);
+    player->giveMoney(reward);
   }
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->giveMoney(reward);
   }
   bool canBeAStartPosition() override {
     return true;
@@ -46,13 +49,14 @@ class GoalField : public Field {
   }
 
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->addMoney(bonus);
   }
 };
 
 // rzut karny – przy zatrzymaniu się na tym polu gracz musi zapłacić Szczęsnemu
 // za obronę rzutu karnego;
 class PenaltyKickField : public Field {
+ private:
   const zdzislaw_t penalty;
 
  public:
@@ -61,7 +65,7 @@ class PenaltyKickField : public Field {
   }
 
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    player->takeMoney(penalty);
   }
 };
 
@@ -69,8 +73,10 @@ class PenaltyKickField : public Field {
 // zdzisławach, a pozostali przegrywają; seria zaczyna się od wygranego zakładu
 // u bukmachera;
 class BookmakerField : public Field {
+  const unsigned int modulo = 3;
   const zdzislaw_t winnings;
   const zdzislaw_t losses;
+  unsigned int counter;
 
  public:
   BookmakerField(std::string name, const zdzislaw_t winnings,
@@ -79,7 +85,12 @@ class BookmakerField : public Field {
   }
 
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+    if (counter == 0) {
+      player->giveMoney(winnings);
+    } else {
+      player->takeMoney(losses);
+    }
+    counter = (counter + 1) % modulo;
   }
 };
 
@@ -105,6 +116,7 @@ class MatchField : public Field {
   enum MatchWeight { FRIENDLY, FOR_POINTS, FINAL };
 
  private:
+  zdiislaw_t currentBank = 0;
   const zdzislaw_t fee;
   const MatchWeight weight;
 
@@ -127,10 +139,12 @@ class MatchField : public Field {
 
  public:
   void onPlayerPassesThrough(std::shared_ptr<Player> player) override {
-    Field::onPlayerPassesThrough(player);
+        player->takeMoney(fee);
+        currentBank += fee;
   }
   void onPlayerLands(std::shared_ptr<Player> player) override {
-    Field::onPlayerLands(player);
+        player->addMoney(currentBank * getMatchWeight());
+        currentBank = 0;
   }
 };
 

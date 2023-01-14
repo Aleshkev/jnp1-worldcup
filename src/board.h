@@ -16,6 +16,7 @@ class Board {
 
   explicit Board(const std::vector<std::shared_ptr<Field>>& fields)
       : fields(fields) {
+      : fields(fields) {
     startPosition = 0;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (fields.at(i)->canBeAStartPosition()) {
