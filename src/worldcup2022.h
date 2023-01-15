@@ -132,8 +132,10 @@ class WorldCup2022 : public WorldCup {
 
     // TODO
 
-    for (auto &player : activePlayers) {
-      currentScoreboard->onTurn(player->getName(), player->getStatus(), "",
+    for (size_t playerID = 0; playerID < activePlayers.size(); ++playerID) {
+      auto &player = activePlayers[playerID];
+      currentScoreboard->onTurn(player->getName(), player->getStatus(),
+                                board->getField(playerPositions[playerID])->getName(),
                                 player->getMoney());
     }
   }
