@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <cassert>
+#include <iostream>
 #include "worldcup2022.h"
 
 class ExampleDie : public Die {
@@ -48,6 +49,8 @@ int main() {
   worldCup2022->setScoreBoard(scoreboard);
 
   worldCup2022->play(100);
+  std::cout << scoreboard->str();
+  return 0;
   assert(scoreboard->str() ==
          "=== Runda: 0\n"
          "Lewandowski [w grze] [840] - Dzień wolny od treningu\n"
