@@ -121,9 +121,10 @@ class WorldCup2022 : public WorldCup {
           (playerPositions[playerID] + move) % board->getNFields();
 
       while (!player->getIsBancrupt() && playerPositions[playerID] != targetPosition) {
-      playerPositions[playerID] = (playerPositions[playerID]+ 1) % board->getNFields(); 
-      if (playerPositions[playerID] != targetPosition) {
-        board->getField(playerPositions[playerID]) ->onPlayerPassesThrough(player); }
+        playerPositions[playerID] = (playerPositions[playerID]+ 1) % board->getNFields(); 
+        if (playerPositions[playerID] != targetPosition) {
+          board->getField(playerPositions[playerID]) ->onPlayerPassesThrough(player);
+        }
       }
       if(!player->getIsBancrupt()) {
         board->getField(playerPositions[playerID])->onPlayerLands(player);

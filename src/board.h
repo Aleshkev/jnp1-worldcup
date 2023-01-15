@@ -52,7 +52,7 @@ class DefaultBoard : public Board {
             // mecz z San Marino, szansa na wygraną, towarzyski, opłata za
             // rozegranie meczu to 160 zdzisławów;
             std::make_shared<MatchField>(
-                "mecz z San Marino", MatchField::MatchWeight::FRIENDLY, 160),
+                "Mecz z San Marino", MatchField::MatchWeight::FRIENDLY, 160),
 
             // dzień wolny od treningu; odpoczywasz i popijasz napoje wedle
             // wyboru, nic się nie dzieje, trener może Ci skoczyć;
@@ -86,7 +86,7 @@ class DefaultBoard : public Board {
             // mecz z Argentyną, zwykle mecz o honor, ale jest szansa na wygraną
             // 0:2, o punkty, opłata za rozegranie meczu 250 zdzisławów;
             std::make_shared<MatchField>(
-                "mecz z Argentyną", MatchField::MatchWeight::FOR_POINTS, 250),
+                "Mecz z Argentyną", MatchField::MatchWeight::FOR_POINTS, 250),
 
             // gol, po weryfikacji VAR sędzia uznaje gola i dostajesz premię 120
             // zdzisławów;
